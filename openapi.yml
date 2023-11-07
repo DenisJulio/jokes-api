@@ -1,0 +1,98 @@
+openapi: "3.0.3"
+info:
+  description: |-
+    The funniest Jokes around the cyberspace
+  title: Jokes API
+  version: "1"
+paths:
+  /jokes:
+    get:
+      tags: 
+        - jokes
+      description: Retrieves a list of Jokes
+      responses: 
+        200:
+          description: A list of Jokes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Joke'
+    post:
+      tags:
+        - jokes
+      description: Creates a new Joke
+      requestBody:
+        description: A new Joke
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+              required:
+                - content
+      responses:
+        201:
+          description: The newly created Joke
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Joke'
+      security:
+        - Oauth:
+          - jokes:create
+  /jokes/{jokeId}:
+    parameters:
+      - name: jokeId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags:
+        - jokes
+      description: Retrieves a Joke
+      responses:
+        200:
+          description: A Joke
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Joke'
+    delete:
+      tags:
+        - jokes
+      description: Deletes a Joke if the User is its author
+      responses:
+        204:
+          description: Deleted the Joke
+      security:
+        - Oauth:
+          - jokes:delete
+      
+components:
+  schemas:
+    Joke:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        author-id:
+          type: integer
+  securitySchemes:
+    Oauth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /auth
+          tokenUrl: /token
+          scopes:
+            jokes:create: create new Jokes
+            jokes:delete: deletes Jokes owned by the user
+      
