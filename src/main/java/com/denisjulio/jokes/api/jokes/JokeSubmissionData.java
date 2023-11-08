@@ -1,5 +1,6 @@
 package com.denisjulio.jokes.api.jokes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 
@@ -9,6 +10,7 @@ public class JokeSubmissionData {
   @JsonProperty(value = "content", required = true)
   private String content;
 
+  @JsonCreator
   public JokeSubmissionData(String content) {
     this.content = content;
   }

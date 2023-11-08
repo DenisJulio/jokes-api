@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/jokes")
+@RestController()
+@RequestMapping("/jokes")
 public class JokesController {
 
   private final JokesRepository jokesRepository;
@@ -32,7 +33,7 @@ public class JokesController {
   }
 
   @GetMapping("/{jokeId}")
-  public ResponseEntity<Joke> getJokeById(@PathVariable("jokeId") Long jokeId) {
+  public ResponseEntity<Joke> getJokeById(@PathVariable(value = "jokeId") Long jokeId) {
     var joke = jokesRepository.findById(jokeId)
             .orElseThrow();
     return ResponseEntity.ok(joke);
