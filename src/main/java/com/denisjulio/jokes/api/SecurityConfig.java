@@ -21,17 +21,15 @@ public class SecurityConfig {
   String jwkSetUri;
 
   @Bean
-  public MvcRequestMatcher.Builder mvc(HandlerMappingIntrospector introspector) {
-    return new MvcRequestMatcher.Builder(introspector).servletPath("/");
-  }
+  public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+    var mvcReq = new MvcRequestMatcher.Builder(introspector);
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
     http
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(mvc.pattern(HttpMethod.POST, "/jokes")).hasRole("joker")
-                    .requestMatchers(mvc.pattern(HttpMethod.DELETE, "jokes/**")).hasRole("joker")
-                    .anyRequest().permitAll())
+                            .requestMatchers(mvcReq.pattern(HttpMethod.POST, "/jokes")).hasAuthority("SCOPE_joker")
+//                            .requestMatchers(mvc.pattern(HttpMethod.DELETE, "jokes/**")).hasAuthority("SCOPE_joker")
+                    .requestMatchers(mvcReq.pattern(HttpMethod.GET,"/jokes")).permitAll()
+                    .anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
     return http.build();
   }
