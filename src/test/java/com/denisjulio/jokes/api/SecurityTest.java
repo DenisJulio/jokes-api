@@ -12,6 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -26,7 +29,7 @@ class SecurityTest {
   private MockMvc mvc;
 
   private String jokeSubmissionData;
-  private Jwt validJwt;
+  private List<Jwt> validJwts;
 
   @BeforeEach
   void setup() {
@@ -35,11 +38,18 @@ class SecurityTest {
               "content": "A new Joke"
             }
             """;
-    validJwt = Jwt.withTokenValue("token")
+    validJwts = new ArrayList<>();
+    validJwts.add(Jwt.withTokenValue("token")
             .header("alg", "none")
-            .subject("user")
+            .subject("userOne")
             .claim("scope", "joker")
-            .build();
+            .build());
+    validJwts.add(Jwt.withTokenValue("token")
+            .header("alg", "none")
+            .subject("userTwo")
+            .claim("scope", "joker")
+            .build());
+
   }
 
   @Test
@@ -47,11 +57,11 @@ class SecurityTest {
     var jsonRes = mvc.perform(post("/jokes")
                     .content(jokeSubmissionData)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(jwt().jwt(validJwt)))
+                    .with(jwt().jwt(validJwts.get(0))))
             .andExpect(status().isCreated())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").value(notNullValue()))
-            .andExpect(jsonPath("$.authorId").value(is(validJwt.getSubject())))
+            .andExpect(jsonPath("$.authorId").value(is(validJwts.get(0).getSubject())))
             .andReturn().getResponse().getContentAsString();
     JSONAssert.assertEquals(jokeSubmissionData, jsonRes, JSONCompareMode.LENIENT);
   }
@@ -67,16 +77,29 @@ class SecurityTest {
   }
 
   @Test
-  void whenDeleteJokeByIdWithInsufficientAuthoritiesThenReturn403() throws Exception {
+  void whenDeleteJokeByIdWithValidJwtAndBeingItsAuthorThenReturnNoContent() throws Exception {
     var jsonRes = mvc.perform(post("/jokes")
                     .content(jokeSubmissionData)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .with(jwt().jwt(validJwt)))
+                    .with(jwt().jwt(validJwts.get(0))))
             .andReturn().getResponse().getContentAsString();
     var json = new JSONObject(jsonRes);
     mvc.perform(delete("/jokes/{jokeId}", json.get("id"))
-                    .with(jwt().jwt(validJwt)))
+                    .with(jwt().jwt(validJwts.get(0))))
             .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void whenDeleteJokeByIdFromAnotherAuthorThenReturn403() throws Exception {
+    var jsonRes = mvc.perform(post("/jokes")
+                    .content(jokeSubmissionData)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(jwt().jwt(validJwts.get(0))))
+            .andReturn().getResponse().getContentAsString();
+    var json = new JSONObject(jsonRes);
+    mvc.perform(delete("/jokes/{jokeId}", json.get("id"))
+                    .with(jwt().jwt(validJwts.get(1))))
+            .andExpect(status().is(403));
   }
 
   @Test
