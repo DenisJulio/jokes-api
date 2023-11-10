@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
   @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
@@ -27,7 +29,7 @@ public class SecurityConfig {
     http
             .authorizeHttpRequests(authorize -> authorize
                             .requestMatchers(mvcReq.pattern(HttpMethod.POST, "/jokes")).hasAuthority("SCOPE_joker")
-//                            .requestMatchers(mvc.pattern(HttpMethod.DELETE, "jokes/**")).hasAuthority("SCOPE_joker")
+                            .requestMatchers(mvcReq.pattern(HttpMethod.DELETE, "jokes/**")).hasAuthority("SCOPE_joker")
                     .requestMatchers(mvcReq.pattern(HttpMethod.GET,"/jokes")).permitAll()
                     .anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

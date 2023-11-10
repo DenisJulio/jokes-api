@@ -11,16 +11,16 @@ import java.util.List;
 @RequestMapping("/jokes")
 public class JokesController {
 
-  private final JokesRepository jokesRepository;
+  private final JokesService jokesService;
 
-  public JokesController(JokesRepository jokesRepository) {
-    this.jokesRepository = jokesRepository;
+  public JokesController(JokesService jokesService) {
+    this.jokesService = jokesService;
   }
 
 
   @GetMapping
   public ResponseEntity<List<Joke>> getJokes() {
-    var jokes = jokesRepository.findAll();
+    var jokes = jokesService.getJokes();
     return ResponseEntity.ok(jokes);
   }
 
@@ -29,19 +29,23 @@ public class JokesController {
     var newJoke = new Joke(jokeData.getContent(), jwt.getSubject());
     return ResponseEntity
             .status(201)
-            .body(jokesRepository.save(newJoke));
+            .body(jokesService.saveJoke(newJoke));
   }
 
   @GetMapping("/{jokeId}")
   public ResponseEntity<Joke> getJokeById(@PathVariable(value = "jokeId") Long jokeId) {
-    var joke = jokesRepository.findById(jokeId)
+    return jokesService.getJokeById(jokeId)
+            .map(ResponseEntity::ok)
             .orElseThrow();
-    return ResponseEntity.ok(joke);
   }
 
   @DeleteMapping("/{jokeId}")
-  public ResponseEntity<Void> deleteJokeById(@PathVariable("jokeId") Long jokeId) {
-    jokesRepository.deleteById(jokeId);
-    return ResponseEntity.status(204).build();
+  public ResponseEntity<Object> deleteJokeById(@PathVariable("jokeId") Long jokeId) {
+    return jokesService.getJokeById(jokeId)
+            .map(joke -> {
+              jokesService.deleteJoke(joke);
+              return ResponseEntity.noContent().build();
+            })
+            .orElseThrow();
   }
 }
