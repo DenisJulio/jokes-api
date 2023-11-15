@@ -7,8 +7,5 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     volumes:
-      - data:/etc/data
-    command: start-dev
-
-volumes:
-  data:
+      - ./src/main/resources/realm-config:/opt/keycloak/data/import/
+    command: start-dev --import-realm

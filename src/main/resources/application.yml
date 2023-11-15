@@ -5,3 +5,21 @@ spring:
         jwt:
           jwk-set-uri: http://localhost:8180/realms/jokes/protocol/openid-connect/certs
           issuer-uri: http://localhost:8180/realms/jokes
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+
+logging:
+  level:
+    org.springframework.security: debug
+
+keycloak-client:
+  client:
+    id: integration-test
+    secret: 2xSDuZhaH2kIYSSV0fJ7ROKqc6YDAF3h
+  users:
+    - username: johndoe
+      password: johndoe
+    - username: janedoe
+      password: janedoe

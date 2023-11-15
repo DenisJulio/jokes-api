@@ -15,20 +15,20 @@ public class JokesService {
     this.jokesRepository = jokesRepository;
   }
 
-  List<Joke> getJokes() {
+  public List<Joke> getJokes() {
     return jokesRepository.findAll();
   }
 
-  Optional<Joke> getJokeById(Long jokeId) {
+  public Optional<Joke> getJokeById(Long jokeId) {
     return jokesRepository.findById(jokeId);
   }
 
-  Joke saveJoke(Joke joke) {
+  public Joke saveJoke(Joke joke) {
     return jokesRepository.save(joke);
   }
 
   @PreAuthorize("#joke.authorId == principal.claims['sub']")
-  void deleteJoke(Joke joke) {
+  public void deleteJoke(Joke joke) {
     jokesRepository.delete(joke);
   }
 }
