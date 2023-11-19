@@ -1,6 +1,11 @@
 package com.denisjulio.jokes.api.jokes;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Table(name = "joke")
 @Entity
@@ -8,7 +13,7 @@ public class Joke {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private Long id;
+    private Long id;
 
   @Column(name = "content", nullable = false)
   private String content;
